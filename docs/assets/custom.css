@@ -1,0 +1,17 @@
+:root {
+    --light-color-background: #fcfcfc;
+    --light-color-secondary-background: #fff;
+    --light-color-text: #251B34;
+    --light-color-text-aside: #584774;
+    --light-color-link: #8c5ade;
+
+    --dark-color-background: #2e223f;
+    --dark-color-secondary-background: #372B4A;
+    --dark-color-link: #BC9AF4;
+    --dark-color-menu-divider: #584774;
+    --dark-color-menu-divider-focus: #251B34;
+    --dark-color-menu-label: #584774;
+    --dark-color-panel-divider: #584774;
+    --dark-color-toolbar: #251B34;
+    --dark-code-background: #251B34;
+}

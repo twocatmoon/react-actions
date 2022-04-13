@@ -1,0 +1,49 @@
+{
+  "name": "@twocatmoon/react-actions",
+  "private": false,
+  "version": "0.0.0",
+  "description": "A dead-simple and boiler-plate free state management strategy for React.",
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js"
+    }
+  },
+  "types": "./dist/types/index.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build && tsc --project tsconfig.build.json && npm run docs:build",
+    "docs:dev": "npm run docs:build & npx http-server docs",
+    "docs:build": "npx typedoc src/lib/index.tsx --customCss ./docStyles.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/twocatmoon/react-actions.git"
+  },
+  "keywords": [
+    "react",
+    "slot",
+    "control flow"
+  ],
+  "author": "Jordan Ranson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/twocatmoon/react-actions/issues"
+  },
+  "homepage": "https://github.com/twocatmoon/react-actions#readme",
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.21",
+    "@types/react": "^17.0.33",
+    "@types/react-dom": "^17.0.10",
+    "@vitejs/plugin-react": "^1.0.7",
+    "typedoc": "^0.22.13",
+    "typescript": "^4.5.4",
+    "vite": "^2.8.0"
+  }
+}

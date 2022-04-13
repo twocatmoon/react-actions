@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "declarationDir": "dist/types",
+        "noEmit": false,
+        "emitDeclarationOnly": true
+    },
+    "extends": "./tsconfig.json",
+    "include": [
+        "src/lib/index.tsx"
+    ]
+}
