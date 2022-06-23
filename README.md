@@ -55,7 +55,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-State management in React doesn't need to be complicated. Built using the Context API and useReducer hook, React Actions provides a straight-forward pattern for designing, manipulating, and caching state across your application. Example:
+State management in React doesn't need to be complicated. Built using the Context API and useReducer hook, React Actions provides a straight-forward pattern for designing, manipulating, and caching state across your application. 
+
+Example using React's Context API:
 
 ```tsx
 // store.ts
@@ -82,7 +84,7 @@ const options: CreateStoreOptions = {
     storageType: 'local'
 }
 
-export const { Provider, useStore } = createStore<State>(initialState, actions, options)
+export const { Provider, useStore } = createStoreContext<State>(initialState, actions, options)
 
 // App.tsx
 
@@ -115,7 +117,62 @@ function App () {
 }
 ```
 
-For a list of all the options that can be passed into `createStore`, please see the [documentation](/modules.html#CreateStoreOptions).
+Example using an event bus:
+
+```tsx
+// store.ts
+
+type State = {
+    counter: number
+}
+
+const initialState = {
+    counter: 0
+}
+
+export const actions = {
+    incrementCounter: action<State, number>((prevState, amount) => {
+        return {
+            ...prevState,
+            counter: prevState.counter + amount
+        }
+    })
+}
+
+const options: CreateStoreOptions = {
+    storageKey: 'myStore',
+    storageType: 'local'
+}
+
+const { useStore } = createStoreEventBus<State>(initialState, actions, options)
+
+// App.tsx
+
+import { useStore, actions } from './store.ts'
+
+function App () {
+    const [ state, dispatch, clearStorage ] = useStore()
+
+    return (
+        <div>
+            <p>Counter: <code>{state.counter}</code></p>
+            <p>
+                <button onClick={() => dispatch(actions.incrementCounter(2))}>
+                    Increment Counter by 2
+                </button>
+            </p>
+            <p>
+                <button onClick={() => clearStorage()}>Clear Local Storage</button>
+            </p>
+        </div>
+    )
+}
+
+export default App
+
+```
+
+For a list of all the options that can be passed into `createStoreContext` and `createStoreEventBus`, please see the [documentation](https://twocatmoon.github.io/react-actions/modules.html#CreateStoreOptions).
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -141,7 +198,9 @@ For a list of all the options that can be passed into `createStore`, please see 
    ```
 2. Include in your project
    ```ts
-   import { action, createStore } from '@twocatmoon/react-actions'
+   import { action, createStoreContext } from '@twocatmoon/react-actions'
+   - or -
+   import { action, createStoreEventBus } from '@twocatmoon/react-actions'
    ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
