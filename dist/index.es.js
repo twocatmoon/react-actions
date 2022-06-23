@@ -1,4 +1,10 @@
-import require$$0, { createContext, useReducer, useContext } from "react";
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
+import require$$0, { createContext, useReducer, useContext, useState, useEffect } from "react";
 var jsxRuntime = { exports: {} };
 var reactJsxRuntime_production_min = {};
 /*
@@ -103,47 +109,18 @@ reactJsxRuntime_production_min.jsxs = q;
   jsxRuntime.exports = reactJsxRuntime_production_min;
 }
 const jsx = jsxRuntime.exports.jsx;
-function action(resolver) {
-  function action2(data) {
-    return [action2.id, data === void 0 ? null : data];
-  }
-  action2.id = "";
-  action2.resolve = resolver;
-  return action2;
-}
-function createStore(initialState, actions, options) {
-  let storageApi;
-  if (typeof window !== "undefined" && (options == null ? void 0 : options.storageKey) && (options == null ? void 0 : options.storageType)) {
-    storageApi = options.storageType === "local" ? localStorage : sessionStorage;
-  }
-  if (storageApi) {
-    try {
-      const storedStateData = storageApi.getItem(options.storageKey);
-      if (storedStateData !== null) {
-        initialState = JSON.parse(storedStateData);
-      }
-    } catch {
-      throw new Error("Unable to parse stored data for store.");
-    }
-  }
+function createStoreContext(initialState, actions, options) {
+  const [storageApi, initialStateResult] = getStorage(options == null ? void 0 : options.storageKey, options == null ? void 0 : options.storageType);
+  if (initialStateResult)
+    initialState = initialStateResult;
   const store = createContext({
     state: initialState || null,
     dispatch: null
   });
   Object.entries(actions).forEach(([key, action2]) => action2.id = key);
   const Provider = (props) => {
-    const [state, dispatch] = useReducer((state2, payload) => {
-      const [actionId, data] = payload;
-      const action2 = actions[actionId];
-      if (!action2) {
-        throw new Error(`Action with ID '${actionId}' does not exist for this Store.`);
-      }
-      const result = action2.resolve(state2, data);
-      if (storageApi) {
-        storageApi.setItem(options.storageKey, JSON.stringify(result));
-      }
-      return result;
-    }, initialState);
+    const reducer = makeReducer(actions, storageApi, options == null ? void 0 : options.storageKey);
+    const [state, dispatch] = useReducer(reducer, initialState);
     return /* @__PURE__ */ jsx(store.Provider, {
       value: {
         state,
@@ -157,18 +134,111 @@ function createStore(initialState, actions, options) {
       state,
       dispatch
     } = useContext(store);
-    const clearStorage = () => {
-      if (storageApi) {
-        storageApi.removeItem(options == null ? void 0 : options.storageKey);
-      } else {
-        throw new Error("Unable to clear storage; no storage options set.");
-      }
-    };
-    return [state, dispatch, clearStorage];
+    return [state, dispatch, () => clearStorage(storageApi, options == null ? void 0 : options.storageKey)];
   };
   return {
     Provider,
     useStore
   };
 }
-export { action, createStore };
+class Store {
+  constructor(initialState) {
+    __publicField(this, "listeners", {});
+    __publicField(this, "state");
+    this.state = initialState;
+  }
+  on(event, listener) {
+    const listeners = this.listeners[event] || [];
+    listeners.push(listener);
+    this.listeners[event] = listeners;
+    return listener;
+  }
+  off(event, listener) {
+    const listeners = this.listeners[event] || [];
+    const index = listeners.indexOf(listener);
+    listeners.splice(index, 1);
+    this.listeners[event] = listeners;
+  }
+  trigger(event, data) {
+    const listeners = this.listeners[event] || [];
+    return listeners.map((listener) => listener(data));
+  }
+}
+function createStoreEventBus(initialState, actions, options) {
+  const [storageApi, initialStateResult] = getStorage(options == null ? void 0 : options.storageKey, options == null ? void 0 : options.storageType);
+  if (initialStateResult)
+    initialState = initialStateResult;
+  const store = new Store(initialState);
+  Object.entries(actions).forEach(([key, action2]) => action2.id = key);
+  const reducer = makeReducer(actions, storageApi, options == null ? void 0 : options.storageKey);
+  const dispatch = (payload) => {
+    const newState = reducer(store.state, payload);
+    store.state = newState;
+    store.trigger("state_changed", {
+      newState
+    });
+  };
+  const useStore = () => {
+    const [state, setState] = useState(initialState);
+    useEffect(() => {
+      const stateChangedListener = store.on("state_changed", ({
+        newState
+      }) => setState(newState));
+      return () => {
+        store.off("state_changed", stateChangedListener);
+      };
+    });
+    return [state, dispatch, () => clearStorage(storageApi, options == null ? void 0 : options.storageKey)];
+  };
+  return {
+    useStore
+  };
+}
+function action(resolver) {
+  function action2(data) {
+    return [action2.id, data === void 0 ? null : data];
+  }
+  action2.id = "";
+  action2.resolve = resolver;
+  return action2;
+}
+function makeReducer(actions, storageApi, storageKey) {
+  return function(state, payload) {
+    const [actionId, data] = payload;
+    const action2 = actions[actionId];
+    if (!action2) {
+      throw new Error(`Action with ID '${actionId}' does not exist for this Store.`);
+    }
+    const result = action2.resolve(state, data);
+    if (storageApi && storageKey) {
+      storageApi.setItem(storageKey, JSON.stringify(result));
+    }
+    return result;
+  };
+}
+function getStorage(storageKey, storageType) {
+  let storageApi;
+  let initialState;
+  if (typeof window !== "undefined" && storageKey && storageType) {
+    storageApi = storageType === "local" ? localStorage : sessionStorage;
+  }
+  if (storageApi) {
+    try {
+      const storedStateData = storageApi.getItem(storageKey);
+      if (storedStateData !== null) {
+        initialState = JSON.parse(storedStateData);
+      }
+    } catch {
+      throw new Error("Unable to parse stored data for store.");
+    }
+  }
+  return [storageApi, initialState];
+}
+function clearStorage(storageApi, storageKey) {
+  if (storageApi && storageKey) {
+    storageApi.removeItem(storageKey);
+  } else {
+    throw new Error("Unable to clear storage; no storage options set.");
+  }
+}
+export { Store, action, clearStorage, createStoreContext, createStoreEventBus, getStorage, makeReducer };

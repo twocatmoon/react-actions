@@ -1,15 +1,5 @@
-/// <reference types="react" />
-export declare type Store<State> = {
-    Provider: (props: {
-        children: React.ReactNode;
-    }) => JSX.Element;
-    useStore: () => [State, React.Dispatch<ActionPayload<any>>, () => void];
-};
-/** The shape of the React context object that contains the Store's state and dispatch function. */
-export declare type StoreContext<State> = {
-    state: State | null;
-    dispatch: React.Dispatch<ActionPayload<any>>;
-};
+export * from './context';
+export * from './eventBus';
 export declare type CreateStoreOptions = {
     /** Key to use when storing state in local/session storage */
     storageKey?: string;
@@ -67,32 +57,9 @@ export declare type Action<State, Input> = {
  * ```
  */
 export declare function action<State, Input>(resolver: Action<State, Input>['resolve']): Action<State, Input>;
-/**
- * @param {any} initialState - The initial state of the Store
- * @param {ActionMap} actions - The map of Actions to bind to the returned Store
- * @param {CreateStoreOptions} options? - Additional options
- * @returns {Store}
- *
- * @example
- * ```tsx
- * type State = {
- *     counter: number
- * }
- *
- * const initialState = {
- *     counter: 0
- * }
- *
- * const actions = {
- *     ...
- * }
- *
- * const options: CreateStoreOptions = {
- *     storageKey: 'myStore',
- *     storageType: 'local'
- * }
- *
- * export const { Provider, useStore } = createStore<State>(initialState, actions, options)
- * ```
- */
-export declare function createStore<State>(initialState: State, actions: ActionMap, options?: CreateStoreOptions): Store<State>;
+/** Used internally to generate the reducer for the different Stores */
+export declare function makeReducer<State>(actions: ActionMap, storageApi: Storage | undefined, storageKey: CreateStoreOptions['storageKey']): (state: State, payload: ActionPayload<any>) => any;
+/** Used internally to retrieve the storage API and initial state */
+export declare function getStorage<State>(storageKey: CreateStoreOptions['storageKey'], storageType: CreateStoreOptions['storageType']): [Storage | undefined, State | undefined];
+/** Used internally to clear the cached state */
+export declare function clearStorage(storageApi: Storage | undefined, storageKey: CreateStoreOptions['storageKey']): void;
