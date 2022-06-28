@@ -106,7 +106,7 @@ function createStoreEventBus(initialState, actions, options) {
     });
   };
   const useStore = () => {
-    const [state, setState] = useState(initialState);
+    const [state, setState] = useState(store.state);
     useEffect(() => {
       const stateChangedListener = store.on("state_changed", ({
         newState
