@@ -92,7 +92,7 @@ export function createStoreEventBus <State> (initialState: State, actions: Actio
     }
 
     const useStore = () => {
-        const [ state, setState ] = useState(initialState)
+        const [ state, setState ] = useState(store.state)
 
         useEffect(() => {
             const stateChangedListener = store.on(
