@@ -24,8 +24,12 @@
   },
   "keywords": [
     "react",
-    "slot",
-    "control flow"
+    "state management",
+    "store",
+    "redux",
+    "context api",
+    "event bus",
+    "actions"
   ],
   "author": "Jordan Ranson",
   "license": "MIT",
