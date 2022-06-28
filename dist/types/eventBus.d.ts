@@ -18,6 +18,7 @@ export declare class Store<State> {
 }
 export declare type CreateStoreEventBusResult<State> = {
     useStore: () => [State, React.Dispatch<ActionPayload<any>>, () => void];
+    clientReady: () => void;
 };
 /**
  * @param {any} initialState - The initial state of the Store

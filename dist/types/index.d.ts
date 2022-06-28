@@ -5,6 +5,8 @@ export declare type CreateStoreOptions = {
     storageKey?: string;
     /** Storage API to use, if any */
     storageType?: 'local' | 'session';
+    /** Enable support for server-side rendering */
+    ssr?: boolean;
 };
 export declare type Reducer<State> = (prevState: State, 
 /** Payload generated from calling an Action */

@@ -93,7 +93,7 @@ class Store {
 }
 function createStoreEventBus(initialState, actions, options) {
   const [storageApi, initialStateResult] = getStorage(options == null ? void 0 : options.storageKey, options == null ? void 0 : options.storageType);
-  if (initialStateResult)
+  if (!(options == null ? void 0 : options.ssr) && initialStateResult)
     initialState = initialStateResult;
   const store = new Store(initialState);
   Object.entries(actions).forEach(([key, action2]) => action2.id = key);
@@ -117,8 +117,19 @@ function createStoreEventBus(initialState, actions, options) {
     });
     return [state, dispatch, () => clearStorage(storageApi, options == null ? void 0 : options.storageKey)];
   };
+  const clientReady = () => {
+    if (!(options == null ? void 0 : options.ssr))
+      return;
+    if (!initialStateResult)
+      return;
+    store.state = initialStateResult;
+    store.trigger("state_changed", {
+      newState: initialStateResult
+    });
+  };
   return {
-    useStore
+    useStore,
+    clientReady
   };
 }
 function action(resolver) {
