@@ -1,5 +1,4 @@
-/// <reference types="react" />
-import { ActionMap, ActionPayload, CreateStoreOptions } from '.';
+import { ActionMap, CreateStoreOptions, Dispatch, Execute } from '.';
 export declare type ListenerMap = {
     [Property in keyof StoreEvents]: ((...args: any[]) => void)[];
 };
@@ -17,7 +16,7 @@ export declare class Store<State> {
     trigger(event: keyof StoreEvents, data?: any): any[];
 }
 export declare type CreateStoreEventBusResult<State> = {
-    useStore: () => [State, React.Dispatch<ActionPayload<any>>, () => void];
+    useStore: () => [State, Dispatch, Execute, () => void];
 };
 /**
  * @param {any} initialState - The initial state of the Store

@@ -1,15 +1,16 @@
 /// <reference types="react" />
-import { ActionMap, ActionPayload, CreateStoreOptions } from '.';
+import { ActionMap, CreateStoreOptions, Dispatch, Execute } from '.';
 export declare type CreateStoreContextResult<State> = {
     Provider: (props: {
         children: React.ReactNode;
     }) => JSX.Element;
-    useStore: () => [State, React.Dispatch<ActionPayload<any>>, () => void];
+    useStore: () => [State, Dispatch, Execute, () => void];
 };
 /** The shape of the React context object that contains the Store's state and dispatch function. */
 export declare type StoreContext<State> = {
     state: State | null;
-    dispatch: React.Dispatch<ActionPayload<any>>;
+    dispatch: Dispatch;
+    execute: Execute;
 };
 /**
  * @param {any} initialState - The initial state of the Store

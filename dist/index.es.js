@@ -115,16 +115,21 @@ function createStoreContext(initialState, actions, options) {
     initialState = initialStateResult;
   const store = createContext({
     state: initialState || null,
-    dispatch: null
+    dispatch: null,
+    execute: null
   });
   Object.entries(actions).forEach(([key, action2]) => action2.id = key);
   const Provider = (props) => {
     const reducer = makeReducer(actions, storageApi, options == null ? void 0 : options.storageKey);
     const [state, dispatch] = useReducer(reducer, initialState);
+    const execute = async function([executeFn, input]) {
+      return await executeFn(dispatch, state, input);
+    };
     return /* @__PURE__ */ jsx(store.Provider, {
       value: {
         state,
-        dispatch
+        dispatch,
+        execute
       },
       children: props.children
     });
@@ -132,9 +137,10 @@ function createStoreContext(initialState, actions, options) {
   const useStore = () => {
     const {
       state,
-      dispatch
+      dispatch,
+      execute
     } = useContext(store);
-    return [state, dispatch, () => clearStorage(storageApi, options == null ? void 0 : options.storageKey)];
+    return [state, dispatch, execute, () => clearStorage(storageApi, options == null ? void 0 : options.storageKey)];
   };
   return {
     Provider,
@@ -180,6 +186,9 @@ function createStoreEventBus(initialState, actions, options) {
   };
   const useStore = () => {
     const [state, setState] = useState(initialState);
+    const execute = async function([executeFn, input]) {
+      return await executeFn(dispatch, state, input);
+    };
     useEffect(() => {
       const stateChangedListener = store.on("state_changed", ({
         newState
@@ -188,7 +197,7 @@ function createStoreEventBus(initialState, actions, options) {
         store.off("state_changed", stateChangedListener);
       };
     });
-    return [state, dispatch, () => clearStorage(storageApi, options == null ? void 0 : options.storageKey)];
+    return [state, dispatch, execute, () => clearStorage(storageApi, options == null ? void 0 : options.storageKey)];
   };
   return {
     useStore
@@ -201,6 +210,11 @@ function action(resolver) {
   action2.id = "";
   action2.resolve = resolver;
   return action2;
+}
+function actionSet(execute) {
+  return function(data) {
+    return [execute, data];
+  };
 }
 function makeReducer(actions, storageApi, storageKey) {
   return function(state, payload) {
@@ -241,4 +255,4 @@ function clearStorage(storageApi, storageKey) {
     throw new Error("Unable to clear storage; no storage options set.");
   }
 }
-export { Store, action, clearStorage, createStoreContext, createStoreEventBus, getStorage, makeReducer };
+export { Store, action, actionSet, clearStorage, createStoreContext, createStoreEventBus, getStorage, makeReducer };
