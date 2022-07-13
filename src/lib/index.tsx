@@ -14,6 +14,14 @@ export type Reducer <State> = (
     actionPayload: ActionPayload
 ) => State
 
+export type Dispatch <Payload = any> = (
+    payload: ActionPayload<Payload>
+) => void
+
+export type Execute = (
+    actionSetPayload: [ActionSetExecute<any, any, any>, any]
+) => void
+
 export type ActionPayload <Input = any> = [
     actionId: string,
     data: Input, 
@@ -32,6 +40,19 @@ export type Action <State, Input> = {
     /** User-defined resolver function for the action */
     resolve: (state: State, data: Input) => State
 }
+
+export type ActionSetMap = {
+    /** A collection of ActionsSets with human-readable keys */
+    [key: string]: ActionSet<any, any, any>
+}
+
+export type ActionSetExecute <State, Input, Result> = (
+    dispatch: Dispatch,
+    state: State,
+    data: Input,
+) => Promise<Result>
+
+export type ActionSet <State = any, Input = any, Result = void> = (data?: Input) => [ActionSetExecute<State, Input, Result>, Input]
 
 /**
  * Generates an Action object, which when passed into createStore as part of an ActionMap, can be called to mutate the Store's state.
@@ -73,6 +94,41 @@ export function action <State, Input> (resolver: Action<State, Input>['resolve']
     action.resolve = resolver
 
     return action as Action<State, Input>
+}
+
+/**
+ * Generates an ActionSet object, which can be used to execute asynchronous functions and dispatch Actions to the store.
+ * 
+ * @param {ActionSetExecute <State, Input, Result>} execute - Async function to execute
+ * @returns {any} - Optionally returns the Result
+ *
+ * @example
+ * ```tsx
+ * // store.ts
+ * 
+ * const actionSets = {    
+ *     fetchCounterData: actionSet<State, number>(async (dispatch, state, input) => {
+ *         const nextValue = await fetch(`/api/counter/${input}`)
+ *         dispatch(actions.incrementCounter(nextValue))
+ *     })
+ * }
+ * 
+ * ...
+ * 
+ * // Component.tsx
+ * 
+ * function Component () {
+ *     const [ state, dispatch, execute ] = useStore()
+ *     execute(actionSets.fetchCounterData(2))
+ *      
+ *     ...
+ * }
+ * ```
+ */
+export function actionSet <State, Input = any, Result = void> (execute: ActionSetExecute<State, Input, Result>): ActionSet<State, Input, Result> {
+    return function (data?: Input) {
+        return [execute, data as Input]
+    }
 }
 
 /** Used internally to generate the reducer for the different Stores */

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ActionMap, ActionPayload, clearStorage, CreateStoreOptions, getStorage, makeReducer } from '.'
+import { ActionMap, ActionPayload, ActionSet, ActionSetExecute, clearStorage, CreateStoreOptions, Dispatch, Execute, getStorage, makeReducer } from '.'
 
 export type ListenerMap = {
     [Property in keyof StoreEvents]: ((...args: any[]) => void)[]
@@ -39,7 +39,7 @@ export class Store<State> {
 }
 
 export type CreateStoreEventBusResult <State> = {
-    useStore: () => [State, React.Dispatch<ActionPayload<any>>, () => void]
+    useStore: () => [State, Dispatch, Execute, () => void]
 }
 
 /**
@@ -84,7 +84,7 @@ export function createStoreEventBus <State> (initialState: State, actions: Actio
 
     const reducer = makeReducer(actions, storageApi, options?.storageKey)
 
-    const dispatch = (payload: ActionPayload<any>) => {
+    const dispatch: Dispatch = (payload: ActionPayload<any>) => {
         const newState = reducer(store.state, payload)
         store.state = newState
         store.trigger('state_changed', { newState })
@@ -92,6 +92,10 @@ export function createStoreEventBus <State> (initialState: State, actions: Actio
 
     const useStore = () => {
         const [ state, setState ] = useState(initialState)
+
+        const execute = async function <Result> ([executeFn, input]: [ActionSetExecute<State, any, any>, any]): Promise<Result> {
+            return await executeFn(dispatch, state, input)
+        }
 
         useEffect(() => {
             const stateChangedListener = store.on(
@@ -107,10 +111,12 @@ export function createStoreEventBus <State> (initialState: State, actions: Actio
         return [
             state,
             dispatch,
+            execute,
             () => clearStorage(storageApi, options?.storageKey)
         ] as [ 
             State, 
-            React.Dispatch<ActionPayload<any>>, 
+            Dispatch, 
+            Execute,
             () => void
         ]
     }
