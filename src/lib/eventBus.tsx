@@ -91,7 +91,7 @@ export function createStoreEventBus <State> (initialState: State, actions: Actio
     }
 
     const useStore = () => {
-        const [ state, setState ] = useState(initialState)
+        const [ state, setState ] = useState(store.state)
 
         const execute = async function <Result> ([executeFn, input]: [ActionSetExecute<State, any, any>, any]): Promise<Result> {
             return await executeFn(dispatch, state, input)
@@ -106,7 +106,7 @@ export function createStoreEventBus <State> (initialState: State, actions: Actio
             return () => {
                 store.off('state_changed', stateChangedListener)
             }
-        })
+        }, [])
 
         return [
             state,
