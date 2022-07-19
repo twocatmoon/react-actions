@@ -6,6 +6,8 @@ export type CreateStoreOptions = {
     storageKey?: string,
     /** Storage API to use, if any */
     storageType?: 'local' | 'session'
+    /** Enable support for server-side rendering */
+    ssr?: boolean
 }
 
 export type Reducer <State> = (

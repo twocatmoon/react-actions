@@ -16,7 +16,12 @@ export declare class Store<State> {
     trigger(event: keyof StoreEvents, data?: any): any[];
 }
 export declare type CreateStoreEventBusResult<State> = {
+<<<<<<< HEAD
     useStore: () => [State, Dispatch, Execute, () => void];
+=======
+    useStore: () => [State, React.Dispatch<ActionPayload<any>>, () => void];
+    clientReady: () => void;
+>>>>>>> 8b9ca1db95d9891fa98f679c17266f6ff2adc822
 };
 /**
  * @param {any} initialState - The initial state of the Store

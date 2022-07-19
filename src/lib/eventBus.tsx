@@ -40,6 +40,7 @@ export class Store<State> {
 
 export type CreateStoreEventBusResult <State> = {
     useStore: () => [State, Dispatch, Execute, () => void]
+    clientReady: () => void
 }
 
 /**
@@ -73,7 +74,7 @@ export type CreateStoreEventBusResult <State> = {
 export function createStoreEventBus <State> (initialState: State, actions: ActionMap, options?: CreateStoreOptions): CreateStoreEventBusResult<State> {
     const [ storageApi, initialStateResult ] = getStorage<State>(options?.storageKey, options?.storageType)
 
-    if (initialStateResult) initialState = initialStateResult
+    if (!options?.ssr && initialStateResult) initialState = initialStateResult
 
     const store = new Store(initialState)
 
@@ -121,7 +122,17 @@ export function createStoreEventBus <State> (initialState: State, actions: Actio
         ]
     }
 
+    /** Call this when the client has finished hydrating, eg. inside of a useEffect */
+    const clientReady = () => {
+        if (!options?.ssr) return
+        if (!initialStateResult) return 
+        
+        store.state = initialStateResult
+        store.trigger('state_changed', { newState: initialStateResult })
+    }
+
     return {
-        useStore
+        useStore,
+        clientReady,
     }
 }
