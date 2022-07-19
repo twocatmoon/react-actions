@@ -185,7 +185,7 @@ function createStoreEventBus(initialState, actions, options) {
     });
   };
   const useStore = () => {
-    const [state, setState] = useState(initialState);
+    const [state, setState] = useState(store.state);
     const execute = async function([executeFn, input]) {
       return await executeFn(dispatch, state, input);
     };
@@ -196,7 +196,7 @@ function createStoreEventBus(initialState, actions, options) {
       return () => {
         store.off("state_changed", stateChangedListener);
       };
-    });
+    }, []);
     return [state, dispatch, execute, () => clearStorage(storageApi, options == null ? void 0 : options.storageKey)];
   };
   return {

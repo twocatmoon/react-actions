@@ -91,7 +91,7 @@ export const { Provider, useStore } = createStoreContext<State>(initialState, ac
 import { Provider, useStore, actions } from './store.ts'
 
 function Consumer () {
-    const [ state, dispatch, clearStorage ] = useStore()
+    const [ state, dispatch, _execute, clearStorage ] = useStore()
 
     return (
         <div>
@@ -151,7 +151,7 @@ const { useStore } = createStoreEventBus<State>(initialState, actions, options)
 import { useStore, actions } from './store.ts'
 
 function App () {
-    const [ state, dispatch, clearStorage ] = useStore()
+    const [ state, dispatch, _execute, clearStorage ] = useStore()
 
     return (
         <div>
@@ -169,7 +169,28 @@ function App () {
 }
 
 export default App
+```
 
+Example using asynchronous Action Sets:
+
+```tsx
+// store.ts
+
+export const actionSets = {    
+    fetchCounterData: actionSet<State, number>(async (dispatch, state, input) => {
+        const nextValue = await fetch(`/api/counter/${input}`)
+        dispatch(actions.incrementCounter(nextValue))
+    })
+}
+
+// Component.tsx
+
+function Component () {
+    const [ state, dispatch, execute ] = useStore()
+    execute(actionSets.fetchCounterData(2))
+     
+    ...
+}
 ```
 
 For a list of all the options that can be passed into `createStoreContext` and `createStoreEventBus`, please see the [documentation](https://twocatmoon.github.io/react-actions/modules.html#CreateStoreOptions).
