@@ -10,14 +10,14 @@ export declare type StoreEvents = {
 export declare class Store<State> {
     private listeners;
     state: State;
+    isReady: boolean;
     constructor(initialState: State);
     on<E extends keyof StoreEvents>(event: E, listener: StoreEvents[E]): StoreEvents[E];
     off<E extends keyof StoreEvents>(event: E, listener: StoreEvents[E]): void;
     trigger(event: keyof StoreEvents, data?: any): any[];
 }
 export declare type CreateStoreEventBusResult<State> = {
-    useStore: () => [State, Dispatch, Execute, () => void];
-    clientReady: () => void;
+    useStore: () => [state: State, dispatch: Dispatch, execute: Execute, clearStorage: () => void];
 };
 /**
  * @param {any} initialState - The initial state of the Store

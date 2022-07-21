@@ -4,11 +4,11 @@ export declare type CreateStoreContextResult<State> = {
     Provider: (props: {
         children: React.ReactNode;
     }) => JSX.Element;
-    useStore: () => [State, Dispatch, Execute, () => void];
+    useStore: () => [state: State, dispatch: Dispatch, execute: Execute, clearStorage: () => void];
 };
 /** The shape of the React context object that contains the Store's state and dispatch function. */
 export declare type StoreContext<State> = {
-    state: State | null;
+    state: State;
     dispatch: Dispatch;
     execute: Execute;
 };
