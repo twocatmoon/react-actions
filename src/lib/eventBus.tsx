@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ActionMap, ActionPayload, ActionSet, ActionSetExecute, clearStorage, CreateStoreOptions, Dispatch, Execute, getStorage, makeReducer } from '.'
 
 export type ListenerMap = {
@@ -12,6 +12,7 @@ export type StoreEvents = {
 export class Store<State> {
     private listeners: ListenerMap = {} as ListenerMap
     state: State
+    isReady = false
 
     constructor (initialState: State) {
         this.state = initialState
@@ -39,8 +40,7 @@ export class Store<State> {
 }
 
 export type CreateStoreEventBusResult <State> = {
-    useStore: () => [State, Dispatch, Execute, () => void]
-    clientReady: () => void
+    useStore: () => [state: State, dispatch: Dispatch, execute: Execute, clearStorage: () => void]
 }
 
 /**
@@ -107,6 +107,16 @@ export function createStoreEventBus <State> (initialState: State, actions: Actio
             return () => {
                 store.off('state_changed', stateChangedListener)
             }
+        }, [setState])
+
+        useEffect(() => {
+            if (!options?.ssr) return
+            if (!initialStateResult) return 
+            if (store.isReady) return
+            
+            store.isReady = true
+            store.state = initialStateResult
+            store.trigger('state_changed', { newState: initialStateResult })
         }, [])
 
         return [
@@ -122,17 +132,7 @@ export function createStoreEventBus <State> (initialState: State, actions: Actio
         ]
     }
 
-    /** Call this when the client has finished hydrating, eg. inside of a useEffect */
-    const clientReady = () => {
-        if (!options?.ssr) return
-        if (!initialStateResult) return 
-        
-        store.state = initialStateResult
-        store.trigger('state_changed', { newState: initialStateResult })
-    }
-
     return {
         useStore,
-        clientReady,
     }
 }

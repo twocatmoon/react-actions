@@ -1,14 +1,14 @@
-import { createContext, useContext, useReducer } from 'react'
-import { ActionMap, ActionSet, ActionSetExecute, clearStorage, CreateStoreOptions, Dispatch, Execute, getStorage, makeReducer, Reducer } from '.'
+import { createContext, useContext, useEffect, useReducer, useRef } from 'react'
+import { ActionMap, ActionSetExecute, clearStorage, CreateStoreOptions, Dispatch, Execute, getStorage, makeReducer, Reducer } from '.'
 
 export type CreateStoreContextResult <State> = {
     Provider: (props: { children: React.ReactNode }) => JSX.Element
-    useStore: () => [State, Dispatch, Execute, () => void]
+    useStore: () => [state: State, dispatch: Dispatch, execute: Execute, clearStorage: () => void]
 }
 
 /** The shape of the React context object that contains the Store's state and dispatch function. */
 export type StoreContext <State> = {
-    state: State | null
+    state: State
     dispatch: Dispatch
     execute: Execute
 }
@@ -44,10 +44,10 @@ export type StoreContext <State> = {
 export function createStoreContext <State> (initialState: State, actions: ActionMap, options?: CreateStoreOptions): CreateStoreContextResult<State> {
     const [ storageApi, initialStateResult ] = getStorage<State>(options?.storageKey, options?.storageType)
 
-    if (initialStateResult) initialState = initialStateResult
+    if (!options?.ssr && initialStateResult) initialState = initialStateResult
 
     const store = createContext<StoreContext<State>>({
-        state: initialState || null,
+        state: initialState,
         dispatch: null as any,
         execute: null as any
     })
@@ -65,6 +65,16 @@ export function createStoreContext <State> (initialState: State, actions: Action
             return await executeFn(dispatch, state, input)
         }
 
+        const isReadyRef = useRef(false)
+        useEffect(() => {
+            if (!options?.ssr) return
+            if (!initialStateResult) return 
+            if (isReadyRef.current) return
+
+            isReadyRef.current = true
+            dispatch(['__clientReady__', initialStateResult])
+        }, [dispatch])
+
         return (
             <store.Provider value={{ state, dispatch, execute }}>
                 {props.children}
@@ -79,17 +89,17 @@ export function createStoreContext <State> (initialState: State, actions: Action
             state,
             dispatch,
             execute,
-            () => clearStorage(storageApi, options?.storageKey)
+            () => clearStorage(storageApi, options?.storageKey),
         ] as [ 
             State, 
             Dispatch,
             Execute,
-            () => void
+            () => void,
         ]
     }
 
     return {
         Provider,
-        useStore
+        useStore,
     }
 }

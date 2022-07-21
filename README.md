@@ -144,7 +144,7 @@ const options: CreateStoreOptions = {
     storageType: 'local'
 }
 
-const { useStore } = createStoreEventBus<State>(initialState, actions, options)
+export const { useStore } = createStoreEventBus<State>(initialState, actions, options)
 
 // App.tsx
 
@@ -176,12 +176,8 @@ Example using asynchronous Action Sets:
 ```tsx
 // store.ts
 
-export const actionSets = {    
-    fetchCounterData: actionSet<State, number>(async (dispatch, state, input) => {
-        const nextValue = await fetch(`/api/counter/${input}`)
-        dispatch(actions.incrementCounter(nextValue))
-    })
-}
+const { useStore } = createStoreEventBus<State>(initialState, actions, options)
+const { useStore } = createStoreEventBus<State>(initialState, actions, options)
 
 // Component.tsx
 
@@ -190,6 +186,14 @@ function Component () {
     execute(actionSets.fetchCounterData(2))
      
     ...
+}
+```
+
+Example with Server Side Rendering (SSR) support:
+
+```tsx
+const options: CreateStoreOptions = {
+    ssr: true
 }
 ```
 

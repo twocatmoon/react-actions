@@ -138,6 +138,11 @@ export function makeReducer <State> (actions: ActionMap, storageApi: Storage | u
 ) {
     return function (state: State, payload: ActionPayload<any>) {
         const [ actionId, data ] = payload
+
+        if (actionId === '__clientReady__') {
+            return data
+        }
+
         const action = actions[actionId]
     
         if (!action) {

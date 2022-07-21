@@ -2,6 +2,7 @@ function wait (duration: number) {
     return new Promise((resolve) => setTimeout(resolve, duration))
 }
 
+import { useEffect } from 'react'
 import './App.css'
 import { action, actionSet, createStoreContext, CreateStoreOptions } from './lib'
 
@@ -51,7 +52,8 @@ const actionSets = {
 
 const options: CreateStoreOptions = {
     storageKey: 'myStore',
-    storageType: 'local'
+    storageType: 'local',
+    ssr: true,
 }
 
 const { Provider, useStore } = createStoreContext<State>(initialState, actions, options)
