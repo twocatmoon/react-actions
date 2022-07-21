@@ -1,7 +1,7 @@
 {
   "name": "@twocatmoon/react-actions",
   "private": false,
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "A dead-simple and boiler-plate free state management strategy for React.",
   "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",
